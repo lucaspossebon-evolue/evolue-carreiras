@@ -9,7 +9,6 @@ const EVOLUE_CONFIG = {
     key: 'sb_publishable_F2T8cVn0dgoN-yB3G0QCKQ_UvKTKqSGAGBIvj',
   },
 
-  // Planos e limites
   planos: {
     free: {
       curriculos_gratis: 6,
@@ -27,26 +26,23 @@ const EVOLUE_CONFIG = {
     }
   },
 
-  // Career Points por ação
   pontos: {
-    cadastro_completo:    10,
-    curriculo_gerado:      8,
-    entrevista_simulada:   5,
-    disc_preenchido:       8,
-    vaga_registrada:       3,
-    ats_score_feito:       4,
-    cover_letter_gerada:   4,
-    login_diario:          1,
+    cadastro_completo:  10,
+    curriculo_gerado:    8,
+    entrevista_simulada: 5,
+    disc_preenchido:     8,
+    vaga_registrada:     3,
+    ats_score_feito:     4,
+    cover_letter_gerada: 4,
+    login_diario:        1,
   },
 
-  // Selos
   selos: {
     bronze: { min: 0,  max: 39,  cor: '#CD7F32', label: 'Bronze' },
     prata:  { min: 40, max: 79,  cor: '#94A3B8', label: 'Prata'  },
     ouro:   { min: 80, max: 100, cor: '#F59E0B', label: 'Ouro'   },
   },
 
-  // App
   app: {
     nome: 'Evolue Carreiras',
     versao: '2.0.0',
@@ -54,9 +50,18 @@ const EVOLUE_CONFIG = {
   }
 };
 
-// Inicializa cliente Supabase (carregado via CDN no HTML)
-const { createClient } = window.supabase;
-const supabase = createClient(
-  EVOLUE_CONFIG.supabase.url,
-  EVOLUE_CONFIG.supabase.key
-);
+// Inicializa Supabase
+let supabase;
+if (window.supabase && typeof window.supabase.createClient === 'function') {
+  supabase = window.supabase.createClient(
+    EVOLUE_CONFIG.supabase.url,
+    EVOLUE_CONFIG.supabase.key
+  );
+} else if (typeof createClient === 'function') {
+  supabase = createClient(
+    EVOLUE_CONFIG.supabase.url,
+    EVOLUE_CONFIG.supabase.key
+  );
+} else {
+  console.error('ERRO: Supabase SDK nao encontrado.');
+}
