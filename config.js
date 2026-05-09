@@ -1,31 +1,10 @@
-// ============================================================
-// EVOLUE CARREIRAS — Configuração central
-// config.js
-// ============================================================
-
+// EVOLUE CARREIRAS — config.js
 const EVOLUE_CONFIG = {
-  supabase: {
-    url: 'https://rlqrrbgdljixmayzwohe.supabase.co',
-    key: 'sb_publishable_F2T8cVn0dgoN-yB3G0QCKQ_UvKTKqSGAGBIvj',
+  selos: {
+    bronze: { label: 'Bronze' },
+    prata:  { label: 'Prata'  },
+    ouro:   { label: 'Ouro'   },
   },
-
-  planos: {
-    free: {
-      curriculos_gratis: 6,
-      preco_extra_curriculo: 1.99,
-      ats_scores_mes: 10,
-      cover_letters_mes: 3,
-      job_tracker_vagas: 10,
-    },
-    pro: {
-      curriculos_gratis: Infinity,
-      ats_scores_mes: Infinity,
-      cover_letters_mes: Infinity,
-      job_tracker_vagas: Infinity,
-      preco_mes: 49.90,
-    }
-  },
-
   pontos: {
     cadastro_completo:  10,
     curriculo_gerado:    8,
@@ -36,32 +15,6 @@ const EVOLUE_CONFIG = {
     cover_letter_gerada: 4,
     login_diario:        1,
   },
-
-  selos: {
-    bronze: { min: 0,  max: 39,  cor: '#CD7F32', label: 'Bronze' },
-    prata:  { min: 40, max: 79,  cor: '#94A3B8', label: 'Prata'  },
-    ouro:   { min: 80, max: 100, cor: '#F59E0B', label: 'Ouro'   },
-  },
-
-  app: {
-    nome: 'Evolue Carreiras',
-    versao: '2.0.0',
-    url_producao: 'https://evolue-carreiras.vercel.app',
-  }
+  app: { url_producao: 'https://evolue-carreiras.vercel.app' }
 };
-
-// Inicializa Supabase
-let supabase;
-if (window.supabase && typeof window.supabase.createClient === 'function') {
-  supabase = window.supabase.createClient(
-    EVOLUE_CONFIG.supabase.url,
-    EVOLUE_CONFIG.supabase.key
-  );
-} else if (typeof createClient === 'function') {
-  supabase = createClient(
-    EVOLUE_CONFIG.supabase.url,
-    EVOLUE_CONFIG.supabase.key
-  );
-} else {
-  console.error('ERRO: Supabase SDK nao encontrado.');
-}
+window.EVOLUE_CONFIG = EVOLUE_CONFIG;
