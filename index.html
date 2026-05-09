@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Evolue Carreiras</title>
+  <meta name="description" content="Plataforma de preparação profissional — currículo, entrevista, DISC, ATS Score e banco de talentos." />
+  <link rel="preload" as="image" href="Ativos/evolue-logo-cropped.png" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════
+       TELA DE AUTH (login/cadastro) — visível quando deslogado
+  ══════════════════════════════════════════════════════════ -->
+  <div id="authScreen" class="auth-screen">
+    <div class="auth-left">
+      <div class="auth-brand">
+        <img src="Ativos/evolue-logo-cropped.png" alt="Evolue" />
+      </div>
+      <h1 class="auth-headline">Sua carreira começa aqui.</h1>
+      <p class="auth-sub">Currículo profissional, simulador de entrevista, ATS Score e banco de talentos — tudo em um lugar.</p>
+      <div class="auth-destaques">
+        <div class="auth-destaque">✅ Currículo validado EVOLUE</div>
+        <div class="auth-destaque">⚡ ATS Score — compatibilidade com vagas</div>
+        <div class="auth-destaque">🎯 Simulador de entrevista com feedback</div>
+        <div class="auth-destaque">🏆 Selos Bronze, Prata e Ouro</div>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <div class="auth-card">
+        <!-- Tabs -->
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login">Entrar</button>
+          <button class="auth-tab" data-tab="cadastro">Criar conta</button>
+        </div>
+
+        <!-- Login -->
+        <div class="auth-form active" id="formLogin">
+          <div class="form-group">
+            <label>E-mail</label>
+            <input type="email" id="loginEmail" placeholder="seu@email.com" />
+          </div>
+          <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="loginSenha" placeholder="Sua senha" />
+          </div>
+          <div id="loginErro" class="auth-erro"></div>
+          <button class="btn-primary full" id="btnEntrar">Entrar</button>
+          <div class="auth-divider"><span>ou</span></div>
+          <button class="btn-ghost full" id="btnGoogle">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Entrar com Google
+          </button>
+          <p class="auth-link">
+            <a href="#" id="linkEsqueceuSenha">Esqueceu a senha?</a>
+          </p>
+        </div>
+
+        <!-- Cadastro -->
+        <div class="auth-form" id="formCadastro">
+          <div class="form-group">
+            <label>Nome completo</label>
+            <input type="text" id="cadNome" placeholder="Ana Souza" />
+          </div>
+          <div class="form-group">
+            <label>E-mail</label>
+            <input type="email" id="cadEmail" placeholder="ana@email.com" />
+          </div>
+          <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="cadSenha" placeholder="Mínimo 6 caracteres" />
+          </div>
+          <div id="cadErro" class="auth-erro"></div>
+          <button class="btn-primary full" id="btnCadastrar">Criar minha conta</button>
+          <div class="auth-divider"><span>ou</span></div>
+          <button class="btn-ghost full" id="btnGoogleCad">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Cadastrar com Google
+          </button>
+          <p class="auth-terms">Ao criar conta, você concorda com nossos <a href="#">Termos de Uso</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       APP PRINCIPAL — visível quando logado
+  ══════════════════════════════════════════════════════════ -->
+  <div id="appScreen" class="app-screen hidden">
+    <div class="shell">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="Ativos/evolue-logo-cropped.png" alt="EVOLUE" />
+          <div>
+            <strong>Carreiras</strong>
+            <span>Banco de talentos</span>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <button class="nav-item active" data-view="perfil">
+            <span class="nav-icon">👤</span> Perfil
+          </button>
+          <button class="nav-item" data-view="curriculo">
+            <span class="nav-icon">📄</span> Currículo
+          </button>
+          <button class="nav-item" data-view="ats">
+            <span class="nav-icon">⚡</span> ATS Score
+          </button>
+          <button class="nav-item" data-view="cover">
+            <span class="nav-icon">✉️</span> Cover Letter
+          </button>
+          <button class="nav-item" data-view="entrevista">
+            <span class="nav-icon">🎯</span> Entrevista
+          </button>
+          <button class="nav-item" data-view="tracker">
+            <span class="nav-icon">📋</span> Job Tracker
+          </button>
+          <button class="nav-item" data-view="disc">
+            <span class="nav-icon">🧠</span> DISC
+          </button>
+          <button class="nav-item" data-view="recomendacoes">
+            <span class="nav-icon">💡</span> Recomendações
+          </button>
+          <button class="nav-item" data-view="dashboard">
+            <span class="nav-icon">📊</span> Dashboard
+          </button>
+        </nav>
+
+        <!-- Score panel -->
+        <section class="score-panel">
+          <span class="eyebrow">Preparo profissional</span>
+          <strong id="levelLabel">Bronze</strong>
+          <div class="score-bar"><span id="scoreBar" style="width:0%"></span></div>
+          <p><span id="scoreValue">0</span>/100 pts</p>
+          <div class="career-points">
+            <span>⭐</span>
+            <span id="careerPoints">0</span> Career Points
+          </div>
+        </section>
+
+        <!-- User info -->
+        <div class="sidebar-user">
+          <div class="user-avatar" id="sidebarAvatar">EV</div>
+          <div class="user-info">
+            <span id="sidebarNome">Candidato</span>
+            <span id="sidebarPlano" class="plano-badge">Free</span>
+          </div>
+          <button class="btn-logout" id="btnLogout" title="Sair">↪</button>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main class="main">
+        <header class="topbar">
+          <div class="topbar-copy">
+            <p class="eyebrow">Plataforma EVOLUE</p>
+            <h1 id="viewTitle">Painel do candidato</h1>
+            <p class="topbar-subtitle" id="viewSubtitle">Jornada de preparação profissional completa.</p>
+          </div>
+          <div class="top-actions">
+            <button id="seedData" class="ghost">Preencher exemplo</button>
+            <button id="clearData" class="danger">Limpar</button>
+          </div>
+        </header>
+
+        <!-- ── PERFIL ──────────────────────────────────────── -->
+        <section class="view active" id="view-perfil">
+          <div class="grid two">
+            <form class="panel" id="profileForm">
+              <div class="section-title">
+                <span>01</span>
+                <div>
+                  <h2>Cadastro do candidato</h2>
+                  <p>Dados base para currículo, recomendações e banco de talentos.</p>
+                </div>
+              </div>
+              <div class="form-grid">
+                <label>Nome<input name="nome" placeholder="Ana Souza" /></label>
+                <label>E-mail<input name="email" type="email" placeholder="ana@email.com" /></label>
+                <label>Telefone<input name="telefone" placeholder="(11) 99999-9999" /></label>
+                <label>Cidade<input name="cidade" placeholder="São Paulo - SP" /></label>
+                <label>Escolaridade<input name="escolaridade" placeholder="Ensino médio completo" /></label>
+                <label>Área de interesse<input name="area" placeholder="Administrativo, comercial..." /></label>
+              </div>
+              <label>Experiência profissional
+                <textarea name="experiencia" rows="5" placeholder="Conte suas experiências, mesmo que informais, voluntárias ou escolares."></textarea>
+              </label>
+              <div class="actions">
+                <button type="button" id="btnSalvarPerfil" class="btn-primary">Salvar perfil</button>
+              </div>
+              <div id="perfilMsg" class="form-msg"></div>
+            </form>
+
+            <section class="panel talent-card">
+              <div class="visual-band">
+                <span>Desenvolvimento profissional</span>
+                <div class="badge-ring"><span id="profileInitials">EV</span></div>
+              </div>
+              <h2 id="profileName">Novo candidato</h2>
+              <p id="profileArea">Área de interesse ainda não informada</p>
+              <dl class="quick-stats">
+                <div><dt>Currículo</dt><dd id="resumeStatus">Pendente</dd></div>
+                <div><dt>Entrevista</dt><dd id="interviewStatus">Pendente</dd></div>
+                <div><dt>DISC</dt><dd id="discStatus">Pendente</dd></div>
+              </dl>
+              <div class="next-steps" id="nextSteps"></div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ── CURRÍCULO ───────────────────────────────────── -->
+        <section class="view" id="view-curriculo">
+          <div class="grid two">
+            <form class="panel" id="resumeForm">
+              <div class="section-title">
+                <span>02</span>
+                <div>
+                  <h2>Gerador de currículo</h2>
+                  <p>Estrutura profissional padronizada EVOLUE.</p>
+                </div>
+              </div>
+              <fieldset class="template-picker">
+                <legend>Modelo</legend>
+                <label class="template-option active" data-template-card="evolue">
+                  <input type="radio" name="template" value="evolue" checked />
+                  <span>EVOLUE Validado</span>
+                  <small>Completo, com selo e DISC.</small>
+                </label>
+                <label class="template-option" data-template-card="essencial">
+                  <input type="radio" name="template" value="essencial" />
+                  <span>Essencial</span>
+                  <small>Direto e limpo.</small>
+                </label>
+                <label class="template-option" data-template-card="primeiro">
+                  <input type="radio" name="template" value="primeiro" />
+                  <span>Primeiro emprego</span>
+                  <small>Valoriza estudos e cursos.</small>
+                </label>
+              </fieldset>
+              <label>Objetivo profissional<input name="objetivo" placeholder="Atuar como auxiliar administrativo" /></label>
+              <label>Experiências<textarea name="experiencias" rows="4" placeholder="Empresa, função, período e atividades."></textarea></label>
+              <label>Cursos<textarea name="cursos" rows="3" placeholder="Cursos, treinamentos, certificações."></textarea></label>
+              <label>Habilidades<textarea name="habilidades" rows="3" placeholder="Comunicação, Excel, organização..."></textarea></label>
+              <label>Idiomas<input name="idiomas" placeholder="Português nativo, inglês básico..." /></label>
+              <label>Informações complementares<textarea name="complementares" rows="2" placeholder="Disponibilidade, CNH, voluntariado..."></textarea></label>
+              <div class="actions">
+                <button type="button" id="improveResume">Sugerir melhorias</button>
+                <button type="button" id="printResume" class="ghost">Emitir PDF</button>
+              </div>
+              <div class="usage-card" id="usageCard">
+                <strong>Plano Free</strong>
+                <p><span id="freeResumeCount">6</span> emissões gratuitas restantes. A partir da 7ª: R$1,99.</p>
+              </div>
+            </form>
+            <section class="panel">
+              <div class="section-title compact">
+                <span>PDF</span>
+                <div><h2>Prévia do currículo</h2><p>Use o botão PDF para imprimir.</p></div>
+              </div>
+              <article id="resumePreview" class="resume-preview"></article>
+              <div id="resumeSuggestions" class="suggestions"></div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ── ATS SCORE ───────────────────────────────────── -->
+        <section class="view" id="view-ats">
+          <div class="grid two">
+            <div class="panel">
+              <div class="section-title">
+                <span>⚡</span>
+                <div>
+                  <h2>ATS Score</h2>
+                  <p>Analise a compatibilidade do seu currículo com a vaga.</p>
+                </div>
+              </div>
+              <label>Seu currículo
+                <textarea id="atsCurriculo" rows="8" placeholder="Cole o texto completo do seu currículo aqui..."></textarea>
+              </label>
+              <label>Descrição da vaga
+                <textarea id="atsVaga" rows="8" placeholder="Cole a descrição completa da vaga aqui..."></textarea>
+              </label>
+              <div class="actions">
+                <button type="button" id="btnAnalisarATS" class="btn-primary">⚡ Analisar compatibilidade</button>
+              </div>
+            </div>
+            <div class="panel" id="atsResultado">
+              <div class="section-title compact">
+                <span>📊</span>
+                <div><h2>Resultado da análise</h2><p>Score e recomendações detalhadas.</p></div>
+              </div>
+              <div id="atsConteudo">
+                <div class="empty-state">
+                  <p>Cole seu currículo e a descrição da vaga para ver o score.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── COVER LETTER ────────────────────────────────── -->
+        <section class="view" id="view-cover">
+          <div class="grid two">
+            <div class="panel">
+              <div class="section-title">
+                <span>✉️</span>
+                <div>
+                  <h2>Cover Letter</h2>
+                  <p>Carta de apresentação personalizada para cada vaga.</p>
+                </div>
+              </div>
+              <label>Empresa<input id="coverEmpresa" placeholder="Nome da empresa" /></label>
+              <label>Cargo<input id="coverCargo" placeholder="Cargo que está se candidatando" /></label>
+              <label>Descrição da vaga
+                <textarea id="coverVaga" rows="5" placeholder="Cole a descrição da vaga..."></textarea>
+              </label>
+              <label>Tom da carta
+                <select id="coverTom">
+                  <option value="profissional">Profissional</option>
+                  <option value="entusiasmado">Entusiasmado</option>
+                  <option value="formal">Formal</option>
+                </select>
+              </label>
+              <div class="actions">
+                <button type="button" id="btnGerarCover" class="btn-primary">✉️ Gerar carta</button>
+              </div>
+            </div>
+            <div class="panel">
+              <div class="section-title compact">
+                <span>📝</span>
+                <div><h2>Sua carta</h2><p>Personalize antes de enviar.</p></div>
+              </div>
+              <div id="coverConteudo">
+                <div class="empty-state"><p>Preencha os dados ao lado para gerar sua carta.</p></div>
+              </div>
+              <div class="actions" id="coverAcoes" style="display:none">
+                <button type="button" id="btnCopiarCover" class="ghost">📋 Copiar</button>
+                <button type="button" id="btnSalvarCover">💾 Salvar</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── ENTREVISTA ──────────────────────────────────── -->
+        <section class="view" id="view-entrevista">
+          <div class="grid two">
+            <section class="panel">
+              <div class="section-title">
+                <span>03</span>
+                <div><h2>Simulador de entrevista</h2><p>Perguntas, resposta e feedback imediato.</p></div>
+              </div>
+              <div class="question-box">
+                <span id="questionCounter">Pergunta 1 de 5</span>
+                <h3 id="currentQuestion">Fale sobre você.</h3>
+              </div>
+              <label>Sua resposta
+                <textarea id="answerInput" rows="8" placeholder="Responda como faria em uma entrevista real."></textarea>
+              </label>
+              <div class="actions">
+                <button type="button" id="analyzeAnswer">Receber feedback</button>
+                <button type="button" id="nextQuestion" class="ghost">Próxima pergunta</button>
+              </div>
+              <div id="answerFeedback" class="feedback"></div>
+            </section>
+            <section class="panel">
+              <div class="section-title compact">
+                <span>Guia</span>
+                <div><h2>Preparação rápida</h2><p>Conteúdos essenciais para candidatos.</p></div>
+              </div>
+              <div class="tips-grid" id="tipsGrid"></div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ── JOB TRACKER ────────────────────────────────── -->
+        <section class="view" id="view-tracker">
+          <div class="panel">
+            <div class="section-title">
+              <span>📋</span>
+              <div>
+                <h2>Job Tracker</h2>
+                <p>Acompanhe todas as suas candidaturas em um kanban visual.</p>
+              </div>
+            </div>
+            <div class="tracker-header">
+              <button type="button" id="btnNovaVaga" class="btn-primary">+ Nova candidatura</button>
+              <div class="tracker-stats" id="trackerStats"></div>
+            </div>
+            <div class="kanban" id="kanbanBoard">
+              <div class="kanban-col" data-status="salvo">
+                <div class="kanban-col-header">💾 Salvos <span class="kanban-count" id="cnt-salvo">0</span></div>
+                <div class="kanban-cards" id="col-salvo"></div>
+              </div>
+              <div class="kanban-col" data-status="aplicado">
+                <div class="kanban-col-header">📤 Aplicados <span class="kanban-count" id="cnt-aplicado">0</span></div>
+                <div class="kanban-cards" id="col-aplicado"></div>
+              </div>
+              <div class="kanban-col" data-status="entrevista">
+                <div class="kanban-col-header">🎯 Entrevista <span class="kanban-count" id="cnt-entrevista">0</span></div>
+                <div class="kanban-cards" id="col-entrevista"></div>
+              </div>
+              <div class="kanban-col" data-status="proposta">
+                <div class="kanban-col-header">🤝 Proposta <span class="kanban-count" id="cnt-proposta">0</span></div>
+                <div class="kanban-cards" id="col-proposta"></div>
+              </div>
+              <div class="kanban-col" data-status="contratado">
+                <div class="kanban-col-header">✅ Contratado <span class="kanban-count" id="cnt-contratado">0</span></div>
+                <div class="kanban-cards" id="col-contratado"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── DISC ───────────────────────────────────────── -->
+        <section class="view" id="view-disc">
+          <div class="grid two">
+            <form class="panel" id="discForm">
+              <div class="section-title">
+                <span>04</span>
+                <div><h2>Perfil DISC</h2><p>Entrada manual, preparada para integração com Quickin.</p></div>
+              </div>
+              <label>Perfil predominante
+                <select name="perfil">
+                  <option value="">Selecione</option>
+                  <option>Dominância</option>
+                  <option>Influência</option>
+                  <option>Estabilidade</option>
+                  <option>Conformidade</option>
+                </select>
+              </label>
+              <div class="form-grid">
+                <label>Dominância<input name="dominancia" type="number" min="0" max="100" value="25" /></label>
+                <label>Influência<input name="influencia" type="number" min="0" max="100" value="25" /></label>
+                <label>Estabilidade<input name="estabilidade" type="number" min="0" max="100" value="25" /></label>
+                <label>Conformidade<input name="conformidade" type="number" min="0" max="100" value="25" /></label>
+              </div>
+              <label>Observações<textarea name="observacoes" rows="4" placeholder="Cole aqui um resumo do resultado DISC."></textarea></label>
+              <div class="actions">
+                <button type="button" id="btnSalvarDisc" class="btn-primary">Salvar DISC</button>
+              </div>
+            </form>
+            <section class="panel">
+              <div class="section-title compact">
+                <span>Perfil</span>
+                <div><h2>Leitura comportamental</h2><p>Resumo para entrevista e desenvolvimento.</p></div>
+              </div>
+              <div id="discBars" class="disc-bars"></div>
+              <div id="discSummary" class="disc-summary"></div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ── RECOMENDAÇÕES ──────────────────────────────── -->
+        <section class="view" id="view-recomendacoes">
+          <div class="panel">
+            <div class="section-title">
+              <span>05</span>
+              <div><h2>Recomendações inteligentes</h2><p>Baseadas no seu perfil, experiências e preparo atual.</p></div>
+            </div>
+            <div id="recommendations" class="recommendation-grid"></div>
+          </div>
+        </section>
+
+        <!-- ── DASHBOARD ──────────────────────────────────── -->
+        <section class="view" id="view-dashboard">
+          <div class="panel">
+            <div class="section-title">
+              <span>EV</span>
+              <div><h2>Dashboard EVOLUE</h2><p>Visão completa do seu perfil no banco de talentos.</p></div>
+            </div>
+            <div class="dashboard-grid">
+              <div class="metric"><span id="metricScore">0</span><p>pontuação</p></div>
+              <div class="metric"><span id="metricLevel">Bronze</span><p>nível</p></div>
+              <div class="metric"><span id="metricPoints">0</span><p>career points</p></div>
+              <div class="metric"><span id="metricArea">-</span><p>área de interesse</p></div>
+              <div class="metric"><span id="metricDisc">-</span><p>DISC</p></div>
+              <div class="metric"><span id="metricVagas">0</span><p>candidaturas</p></div>
+            </div>
+            <div class="pipeline">
+              <h3>Checklist Perfil Validado EVOLUE</h3>
+              <div id="validationChecklist"></div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ── Modal: Nova candidatura ─────────────────────────────── -->
+  <div id="modalVaga" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Nova candidatura</h3>
+        <button class="modal-close" id="btnFecharModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <label>Empresa<input id="vagaEmpresa" placeholder="Nome da empresa" /></label>
+          <label>Cargo<input id="vagaCargo" placeholder="Cargo" /></label>
+        </div>
+        <label>Link da vaga<input id="vagaLink" placeholder="https://..." /></label>
+        <label>Descrição da vaga<textarea id="vagaDescricao" rows="4" placeholder="Cole a descrição da vaga..."></textarea></label>
+        <div class="form-grid">
+          <label>Status
+            <select id="vagaStatus">
+              <option value="salvo">💾 Salvo</option>
+              <option value="aplicado">📤 Aplicado</option>
+              <option value="entrevista">🎯 Entrevista</option>
+            </select>
+          </label>
+          <label>Salário esperado<input id="vagaSalario" placeholder="R$ 3.000 - 4.000" /></label>
+        </div>
+        <label>Anotações<textarea id="vagaAnotacoes" rows="3" placeholder="Observações sobre a vaga..."></textarea></label>
+      </div>
+      <div class="modal-footer">
+        <button class="ghost" id="btnCancelarModal">Cancelar</button>
+        <button class="btn-primary" id="btnSalvarVaga">Salvar candidatura</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de notificação -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Templates -->
+  <template id="tipTemplate">
+    <article class="tip-card"><strong></strong><p></p></article>
+  </template>
+
+  <!-- Scripts -->
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
