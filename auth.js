@@ -11,13 +11,13 @@ const Auth = (() => {
 
   // ── Inicializa e observa mudanças de sessão ─────────────────
   async function init() {
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
     if (session?.user) {
       _usuario = session.user;
       _perfil  = await carregarPerfil(session.user.id);
     }
 
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         _usuario = session.user;
         _perfil  = await carregarPerfil(session.user.id);
@@ -35,7 +35,7 @@ const Auth = (() => {
 
   // ── Cadastro com e-mail e senha ─────────────────────────────
   async function cadastrar({ nome, email, senha }) {
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await window.supabaseClient.auth.signUp({
       email,
       password: senha,
       options: {
@@ -59,7 +59,7 @@ const Auth = (() => {
 
   // ── Login com e-mail e senha ────────────────────────────────
   async function entrar({ email, senha }) {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
       email,
       password: senha,
     });
@@ -74,7 +74,7 @@ const Auth = (() => {
 
   // ── Login com Google ────────────────────────────────────────
   async function entrarComGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await window.supabaseClient.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: EVOLUE_CONFIG.app.url_producao,
@@ -85,7 +85,7 @@ const Auth = (() => {
 
   // ── Magic Link (sem senha) ──────────────────────────────────
   async function enviarMagicLink(email) {
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await window.supabaseClient.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: EVOLUE_CONFIG.app.url_producao,
@@ -96,13 +96,13 @@ const Auth = (() => {
 
   // ── Logout ──────────────────────────────────────────────────
   async function sair() {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await window.supabaseClient.auth.signOut();
     if (error) throw new Error(traduzirErro(error.message));
   }
 
   // ── Resetar senha ───────────────────────────────────────────
   async function resetarSenha(email) {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
       redirectTo: `${EVOLUE_CONFIG.app.url_producao}/reset-senha.html`,
     });
     if (error) throw new Error(traduzirErro(error.message));
@@ -126,7 +126,7 @@ const Auth = (() => {
     const chave = `evolue_login_${hoje}`;
     if (localStorage.getItem(chave)) return;
 
-    await supabase.rpc('adicionar_career_points', {
+    await window.supabaseClient.rpc('adicionar_career_points', {
       p_user_id: userId,
       p_pontos:  EVOLUE_CONFIG.pontos.login_diario,
       p_motivo:  'Login diário',

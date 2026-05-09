@@ -113,11 +113,11 @@ async function carregarDados() {
   try {
     // Carrega em paralelo
     const [perfil, curriculos, disc, entrevistas, tracker] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', userId).single(),
-      supabase.from('curriculos').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
-      supabase.from('disc_results').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(1),
-      supabase.from('entrevistas').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
-      supabase.from('job_tracker').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      window.supabaseClient.from('profiles').select('*').eq('id', userId).single(),
+      window.supabaseClient.from('curriculos').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      window.supabaseClient.from('disc_results').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(1),
+      window.supabaseClient.from('entrevistas').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      window.supabaseClient.from('job_tracker').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
     ]);
 
     if (perfil.data)      { Estado.perfil      = perfil.data; }
@@ -380,7 +380,7 @@ async function emitirPDF() {
   await salvarCurriculo();
 
   // Atualiza contador
-  await supabase.from('profiles')
+  await window.supabaseClient.from('profiles')
     .update({ curriculos_emitidos: count + 1 })
     .eq('id', Auth.getUsuario().id);
 
@@ -408,7 +408,7 @@ async function salvarCurriculo() {
     complementares:form.querySelector('[name="complementares"]')?.value || '',
   };
 
-  const { data } = await supabase.from('curriculos').insert(dados).select().single();
+  const { data } = await window.supabaseClient.from('curriculos').insert(dados).select().single();
   if (data) Estado.curriculos.unshift(data);
 }
 
@@ -578,7 +578,7 @@ async function salvarCoverLetter() {
 
   if (!userId || !empresa) return;
 
-  await supabase.from('cover_letters').insert({
+  await window.supabaseClient.from('cover_letters').insert({
     user_id: userId,
     empresa, cargo,
     descricao_vaga: vaga,
@@ -645,7 +645,7 @@ async function analisarResposta() {
   // Salva no Supabase
   const userId = Auth.getUsuario()?.id;
   if (userId) {
-    await supabase.from('entrevistas').insert({
+    await window.supabaseClient.from('entrevistas').insert({
       user_id: userId,
       pergunta: PERGUNTAS[Estado.questaoAtual],
       resposta: resp,
@@ -744,7 +744,7 @@ async function salvarVaga() {
     return;
   }
 
-  const { data, error } = await supabase.from('job_tracker').insert(dados).select().single();
+  const { data, error } = await window.supabaseClient.from('job_tracker').insert(dados).select().single();
   if (error) { mostrarToast('❌ Erro ao salvar.'); return; }
 
   Estado.tracker.unshift(data);
@@ -834,7 +834,7 @@ async function salvarDisc() {
     observacoes:          form.querySelector('[name="observacoes"]')?.value,
   };
 
-  const { data, error } = await supabase.from('disc_results').insert(dados).select().single();
+  const { data, error } = await window.supabaseClient.from('disc_results').insert(dados).select().single();
   if (error) { mostrarToast('❌ Erro ao salvar DISC.'); return; }
 
   Estado.disc = data;
@@ -906,7 +906,7 @@ async function pontuar(tipo, motivo, icone) {
   if (!userId) return;
   const pts = EVOLUE_CONFIG.pontos[tipo] || 1;
   try {
-    await supabase.rpc('adicionar_career_points', {
+    await window.supabaseClient.rpc('adicionar_career_points', {
       p_user_id: userId,
       p_pontos: pts,
       p_motivo: motivo,
