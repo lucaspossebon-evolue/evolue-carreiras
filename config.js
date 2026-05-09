@@ -55,7 +55,8 @@ const EVOLUE_CONFIG = {
 };
 
 // Inicializa cliente Supabase (carregado via CDN no HTML)
-const supabase = window.supabase.createClient(
+const { createClient } = window.supabase;
+const supabase = createClient(
   EVOLUE_CONFIG.supabase.url,
   EVOLUE_CONFIG.supabase.key
 );
