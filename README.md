@@ -1,2 +1,10 @@
-# evolue-carreiras
-Plataforma SaaS de preparação profissional — Evolue
+{
+  "name": "evolue-carreiras-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs"
+  }
+}
