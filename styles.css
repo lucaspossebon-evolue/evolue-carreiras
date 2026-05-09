@@ -1,37 +1,37 @@
-import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
-import { extname, join, normalize, relative } from "node:path";
+# Evolue Carreiras
 
-const root = process.cwd();
-const port = Number(process.env.PORT || 4173);
+MVP navegavel da plataforma Evolue Carreiras para preparacao profissional de candidatos.
 
-const types = {
-  ".html": "text/html; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".js": "text/javascript; charset=utf-8"
-};
+## O que esta incluido
 
-createServer(async (request, response) => {
-  const url = new URL(request.url || "/", `http://localhost:${port}`);
-  const requested = url.pathname === "/" ? "/index.html" : url.pathname;
-  const filePath = normalize(join(root, requested));
+- Cadastro do candidato.
+- Gerador de curriculo com previa e impressao em PDF pelo navegador.
+- Sugestoes automaticas de melhoria do curriculo.
+- Central de dicas para entrevistas.
+- Simulador de entrevista com feedback local.
+- Tela de DISC com entrada manual preparada para integracao futura com Quickin.
+- Recomendacoes por perfil, area e preparo.
+- Pontuacao Bronze, Prata e Ouro.
+- Dashboard interno EVOLUE com checklist de Perfil Validado.
 
-  const relativePath = relative(root, filePath);
+## Como rodar
 
-  if (relativePath.startsWith("..")) {
-    response.writeHead(403);
-    response.end("Forbidden");
-    return;
-  }
+Com Node.js instalado:
 
-  try {
-    const body = await readFile(filePath);
-    response.writeHead(200, { "Content-Type": types[extname(filePath)] || "application/octet-stream" });
-    response.end(body);
-  } catch {
-    response.writeHead(404);
-    response.end("Not found");
-  }
-}).listen(port, () => {
-  console.log(`Evolue Carreiras rodando em http://localhost:${port}`);
-});
+```bash
+node server.mjs
+```
+
+Depois acesse:
+
+```text
+http://127.0.0.1:4173
+```
+
+Tambem e possivel abrir o arquivo `index.html` diretamente no navegador.
+
+## Observacoes tecnicas
+
+Esta primeira versao nao usa dependencias externas, porque o ambiente atual tem Node.js mas nao tem `npm` disponivel. Os dados sao salvos no `localStorage` do navegador.
+
+Para evoluir para producao, a recomendacao e migrar esta interface para Next.js, conectar Supabase ou Firebase, adicionar autenticacao e substituir as regras locais por chamadas a API com OpenAI.
