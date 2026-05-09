@@ -67,7 +67,7 @@ img { max-width: 100%; }
   padding: 60px 56px;
   background:
     linear-gradient(160deg, rgba(9,35,76,.97), rgba(21,87,166,.92)),
-    url('assets/evolue-dinamica-treinamento.jpeg') center / cover;
+    url('Ativos/evolue-dinamica-treinamento.jpeg') center / cover;
   color: white;
 }
 
@@ -306,7 +306,7 @@ button.full { width: 100%; }
   padding: 20px 16px;
   background:
     linear-gradient(180deg, rgba(9,35,76,.97), rgba(9,35,76,.93)),
-    url('assets/evolue-networking.jpeg') center / cover;
+    url('Ativos/evolue-networking.jpeg') center / cover;
   box-shadow: 18px 0 54px rgba(9,35,76,.15);
   overflow-y: auto;
 }
@@ -522,7 +522,7 @@ button.full { width: 100%; }
   border: 1px solid rgba(217,225,236,.8);
   background:
     linear-gradient(100deg, rgba(255,255,255,.96), rgba(255,255,255,.75) 60%, rgba(9,35,76,.65)),
-    url('assets/evolue-consultores.jpeg') right center / min(46%,480px) auto no-repeat,
+    url('Ativos/evolue-consultores.jpeg') right center / min(46%,480px) auto no-repeat,
     white;
   box-shadow: var(--shadow-lg);
 }
@@ -730,7 +730,7 @@ input:focus, textarea:focus, select:focus {
   margin: 0 calc(clamp(18px,2.5vw,26px) * -1) 50px;
   background:
     linear-gradient(180deg, rgba(9,35,76,.05), rgba(9,35,76,.78)),
-    url('assets/evolue-evento-imersao.jpeg') center 42% / cover;
+    url('Ativos/evolue-evento-imersao.jpeg') center 42% / cover;
 }
 
 .visual-band > span {
@@ -831,7 +831,7 @@ dd { margin: 3px 0 0; font-weight: 800; color: var(--navy); font-size: 13px; }
   color: white;
   background:
     linear-gradient(120deg, rgba(9,35,76,.95), rgba(21,87,166,.9)),
-    url('assets/evolue-networking.jpeg') center / cover;
+    url('Ativos/evolue-networking.jpeg') center / cover;
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
 
