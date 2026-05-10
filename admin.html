@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin EVOLUE | Banco de Talentos</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <main class="admin-shell">
+    <aside class="admin-sidebar">
+      <div class="brand admin-brand">
+        <img
+          src="Ativos/evolue-logo-cropped.png"
+          alt="EVOLUE"
+          onerror="this.onerror=null;this.src='assets/evolue-logo-cropped.png'"
+        />
+        <div><strong>Admin EVOLUE</strong><span>Banco de talentos</span></div>
+      </div>
+      <div class="admin-session" id="adminSession">
+        <span id="adminSessionLabel">Aguardando login</span>
+        <button id="btnAdminLogout" class="ghost hidden" type="button">Sair</button>
+      </div>
+      <nav class="admin-nav">
+        <a href="index.html">Painel candidato</a>
+        <button id="btnAdminDemo" type="button">Modo demo admin</button>
+      </nav>
+    </aside>
+
+    <section class="admin-main">
+      <header class="admin-hero">
+        <div>
+          <p class="eyebrow">EVOLUE Carreiras</p>
+          <h1>Painel administrativo</h1>
+          <p>Visualize candidatos, filtros de preparo, currículo, DISC, diagnóstico e histórico.</p>
+        </div>
+      </header>
+
+      <section class="admin-login panel" id="adminLogin">
+        <div class="section-title"><span>ADM</span><div><h2>Acesso administrativo</h2><p>Entre com um usuário que tenha <code>role = admin</code> em profiles.</p></div></div>
+        <div class="form-grid">
+          <label>E-mail<input id="adminEmail" type="email" placeholder="admin@evolue.com" /></label>
+          <label>Senha<input id="adminSenha" type="password" placeholder="Sua senha" /></label>
+        </div>
+        <div class="actions">
+          <button id="btnAdminLogin" class="btn-primary" type="button">Entrar como admin</button>
+          <button id="btnAdminDemoLogin" class="ghost" type="button">Ver demonstração</button>
+        </div>
+        <div id="adminLoginMsg" class="form-msg"></div>
+      </section>
+
+      <section class="admin-content hidden" id="adminContent">
+        <div class="admin-metrics" id="adminMetrics"></div>
+
+        <section class="panel">
+          <div class="admin-toolbar">
+            <div>
+              <h2>Candidatos inscritos</h2>
+              <p>Filtre perfis para triagem e indicação às vagas.</p>
+            </div>
+            <div class="admin-filters">
+              <input id="filterBusca" placeholder="Buscar nome ou e-mail" />
+              <input id="filterArea" placeholder="Área" />
+              <input id="filterCidade" placeholder="Cidade" />
+              <select id="filterSelo">
+                <option value="">Todos os selos</option>
+                <option>Bronze</option>
+                <option>Prata</option>
+                <option>Ouro</option>
+              </select>
+            </div>
+          </div>
+          <div id="candidatesList" class="candidate-list"></div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <div id="candidateModal" class="modal-overlay hidden">
+    <div class="modal admin-modal">
+      <div class="modal-header"><h3 id="candidateModalTitle">Detalhe do candidato</h3><button class="modal-close" id="btnCloseCandidate">x</button></div>
+      <div class="modal-body" id="candidateDetail"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script>
+  const SUPABASE_URL = 'https://rlqrrbgdljixmayzwohe.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJscXJyYmdkbGppeG1heXp3b2hlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzMzg0OTcsImV4cCI6MjA5MzkxNDQ5N30.w1rp-fiF0p9oYbQ2ZcXhHJ-7J5Gf0OkGxPfJdN5WCoM';
+  </script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+  window.supabaseClient = window.supabase?.createClient
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+    : null;
+  </script>
+  <script src="admin.js"></script>
+</body>
+</html>

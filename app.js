@@ -109,6 +109,7 @@ function mostrarApp() {
 function resetarEstado() {
   Estado.perfil = null; Estado.curriculos = []; Estado.disc = null;
   Estado.entrevistas = []; Estado.tracker = [];
+  Estado.diagnostico = null; Estado.apresentacoes = [];
 }
 
 // ── Dados ─────────────────────────────────────────────────────
@@ -151,9 +152,42 @@ async function carregarDados() {
     if (d.data?.[0]) Estado.disc      = d.data[0];
     if (e.data)    Estado.entrevistas = e.data;
     if (t.data)    Estado.tracker     = t.data;
+
+    try {
+      const { data } = await SB()
+        .from('diagnosticos')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (data?.[0]) {
+        Estado.diagnostico = {
+          id: data[0].id,
+          score: data[0].score,
+          nivel: data[0].nivel,
+          respostas: data[0].respostas || {},
+          faltantes: data[0].faltantes || [],
+          created_at: data[0].created_at
+        };
+      }
+    } catch (error) {
+      console.warn('Tabela diagnosticos indisponivel, usando dados locais.', error);
+    }
+
+    try {
+      const { data } = await SB()
+        .from('apresentacoes')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      if (data) Estado.apresentacoes = data;
+    } catch (error) {
+      console.warn('Tabela apresentacoes indisponivel, usando dados locais.', error);
+    }
+
     const local = carregarLocal();
-    Estado.diagnostico = local.diagnostico || null;
-    Estado.apresentacoes = local.apresentacoes || [];
+    Estado.diagnostico = Estado.diagnostico || local.diagnostico || null;
+    Estado.apresentacoes = Estado.apresentacoes.length ? Estado.apresentacoes : (local.apresentacoes || []);
 
     preencherFormularioPerfil();
     preencherFormularioDisc();
@@ -345,6 +379,25 @@ async function salvarDiagnostico() {
   const diag = calcularDiagnostico();
   if (!diag) return;
   Estado.diagnostico = diag;
+  if (temBanco()) {
+    try {
+      const { data, error } = await SB()
+        .from('diagnosticos')
+        .insert({
+          user_id: Auth.getUsuario().id,
+          score: diag.score,
+          nivel: diag.nivel,
+          respostas: diag.respostas,
+          faltantes: diag.faltantes
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      if (data) Estado.diagnostico = { ...diag, id: data.id, created_at: data.created_at };
+    } catch (error) {
+      console.warn('Nao foi possivel salvar diagnostico no Supabase. Mantendo copia local.', error);
+    }
+  }
   salvarLocal();
   renderizarDiagnostico();
   renderizarTrilha();
@@ -427,7 +480,34 @@ function copiarApresentacao() {
 async function salvarApresentacao() {
   const texto = document.getElementById('apresentacaoResultado')?.innerText?.trim();
   if (!texto || texto.includes('Preencha os campos')) { mostrarToast('⚠️ Gere uma apresentação primeiro.'); return; }
-  Estado.apresentacoes.unshift({ id: Date.now(), texto, created_at: new Date().toISOString() });
+  const item = {
+    id: Date.now(),
+    user_id: Auth.getUsuario()?.id || 'demo-user',
+    texto,
+    tipo: document.getElementById('apTipo')?.value || 'curta',
+    created_at: new Date().toISOString()
+  };
+
+  if (temBanco()) {
+    try {
+      const { data, error } = await SB()
+        .from('apresentacoes')
+        .insert({
+          user_id: Auth.getUsuario().id,
+          texto: item.texto,
+          tipo: item.tipo
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      Estado.apresentacoes.unshift(data || item);
+    } catch (error) {
+      console.warn('Nao foi possivel salvar apresentacao no Supabase. Mantendo copia local.', error);
+      Estado.apresentacoes.unshift(item);
+    }
+  } else {
+    Estado.apresentacoes.unshift(item);
+  }
   salvarLocal();
   renderizarTrilha();
   atualizarScore();

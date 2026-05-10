@@ -7,7 +7,11 @@ const files = [
   "auth.js",
   "config.js",
   "styles.css",
-  "ats-score.html"
+  "ats-score.html",
+  "admin.html",
+  "admin.css",
+  "admin.js",
+  "supabase-admin-setup.sql"
 ];
 
 const folders = ["Ativos", "assets"];
