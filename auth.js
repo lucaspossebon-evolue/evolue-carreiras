@@ -166,7 +166,7 @@ const Auth = (() => {
   }
 
   async function atualizarPerfil(dados) {
-    if (!_usuario) return;
+    if (!_usuario) criarSessaoLocal({ nome: dados.nome || 'Candidato EVOLUE', email: dados.email || 'demo@evolue.local' });
     if (!temSupabase()) {
       _perfil = { ...perfilLocalBase(_usuario), ...dados, id: _usuario.id, email: _usuario.email };
       localStorage.setItem(LOCAL_PROFILE_KEY, JSON.stringify(_perfil));
@@ -178,8 +178,14 @@ const Auth = (() => {
       .upsert({ id: _usuario.id, email: _usuario.email, ...dados })
       .select()
       .single();
-    if (error) throw new Error('Erro ao salvar perfil.');
+    if (error) {
+      console.warn('Falha ao salvar no Supabase. Salvando perfil localmente.', error);
+      _perfil = { ...perfilLocalBase(_usuario), ...dados, id: _usuario.id, email: _usuario.email };
+      localStorage.setItem(LOCAL_PROFILE_KEY, JSON.stringify(_perfil));
+      return _perfil;
+    }
     _perfil = data;
+    localStorage.setItem(LOCAL_PROFILE_KEY, JSON.stringify(_perfil));
     return data;
   }
 

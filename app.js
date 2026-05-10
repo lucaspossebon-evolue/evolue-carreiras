@@ -20,14 +20,15 @@ function carregarLocal() {
 }
 
 function salvarLocal(extra = {}) {
+  const local = carregarLocal();
   const dados = {
+    ...local,
+    ...extra,
     perfil: Estado.perfil,
     curriculos: Estado.curriculos,
     disc: Estado.disc,
     entrevistas: Estado.entrevistas,
-    tracker: Estado.tracker,
-    ...carregarLocal(),
-    ...extra
+    tracker: Estado.tracker
   };
   localStorage.setItem(LOCAL_DATA_KEY, JSON.stringify(dados));
 }
@@ -241,6 +242,7 @@ async function salvarPerfil() {
   const msg  = document.getElementById('perfilMsg');
   if (!form) return;
   const dados = {
+    email:          form.querySelector('[name="email"]')?.value?.trim() || Auth.getUsuario()?.email || Estado.perfil?.email || '',
     nome:           form.querySelector('[name="nome"]')?.value?.trim(),
     telefone:       form.querySelector('[name="telefone"]')?.value?.trim(),
     cidade:         form.querySelector('[name="cidade"]')?.value?.trim(),
@@ -249,12 +251,13 @@ async function salvarPerfil() {
     experiencia:    form.querySelector('[name="experiencia"]')?.value?.trim(),
   };
   try {
-    const perfil = await Auth.atualizarPerfil(dados);
+    const perfil = await Auth.atualizarPerfil(dados) || { ...(Estado.perfil || {}), ...dados };
     Estado.perfil = perfil;
     atualizarSidebar(); atualizarScore(); atualizarDashboard();
     salvarLocal();
     if (dados.nome && dados.telefone && dados.cidade) await pontuar('cadastro_completo', 'Perfil completo', '👤');
     mostrarMensagem(msg, 'success', '✅ Perfil salvo!');
+    mostrarToast('✅ Perfil salvo!');
   } catch(err) { mostrarMensagem(msg, 'error', '❌ ' + err.message); }
 }
 
