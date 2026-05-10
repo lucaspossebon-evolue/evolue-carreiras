@@ -93,6 +93,9 @@
         </div>
         <nav class="nav">
           <button class="nav-item active" data-view="perfil"><span class="nav-icon">👤</span> Perfil</button>
+          <button class="nav-item" data-view="diagnostico"><span class="nav-icon">🧭</span> Diagnóstico</button>
+          <button class="nav-item" data-view="trilha"><span class="nav-icon">🚀</span> Minha Trilha</button>
+          <button class="nav-item" data-view="apresentacao"><span class="nav-icon">🎙️</span> Fale Sobre Você</button>
           <button class="nav-item" data-view="curriculo"><span class="nav-icon">📄</span> Currículo</button>
           <button class="nav-item" data-view="ats"><span class="nav-icon">⚡</span> ATS Score</button>
           <button class="nav-item" data-view="cover"><span class="nav-icon">✉️</span> Cover Letter</button>
@@ -158,6 +161,68 @@
                 <div><dt>DISC</dt><dd id="discStatus">Pendente</dd></div>
               </dl>
               <div class="next-steps" id="nextSteps"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-diagnostico">
+          <div class="grid two">
+            <form class="panel" id="diagnosticoForm">
+              <div class="section-title"><span>DG</span><div><h2>Diagnóstico de empregabilidade</h2><p>Responda rapidamente para descobrir seu nível atual e próximos passos.</p></div></div>
+              <div class="diagnostic-list">
+                <label class="check-card"><input type="checkbox" name="curriculo" /> Tenho currículo atualizado</label>
+                <label class="check-card"><input type="checkbox" name="apresentacao" /> Sei fazer uma apresentação de 1 minuto</label>
+                <label class="check-card"><input type="checkbox" name="entrevista" /> Já treinei perguntas de entrevista</label>
+                <label class="check-card"><input type="checkbox" name="area" /> Tenho uma área de interesse definida</label>
+                <label class="check-card"><input type="checkbox" name="cursos" /> Tenho cursos, certificados ou aprendizados recentes</label>
+                <label class="check-card"><input type="checkbox" name="whatsapp" /> Sei responder recrutadores pelo WhatsApp de forma profissional</label>
+                <label class="check-card"><input type="checkbox" name="disponibilidade" /> Tenho disponibilidade clara para informar em processos</label>
+                <label class="check-card"><input type="checkbox" name="vagas" /> Candidatei-me a vagas nos últimos 30 dias</label>
+                <label class="check-card"><input type="checkbox" name="pontosFortes" /> Sei explicar meus pontos fortes com exemplos</label>
+                <label class="check-card"><input type="checkbox" name="vagaAlvo" /> Sei adaptar meu currículo para cada vaga</label>
+              </div>
+              <div class="actions"><button type="button" id="btnSalvarDiagnostico" class="btn-primary">Calcular diagnóstico</button></div>
+            </form>
+            <section class="panel">
+              <div class="section-title compact"><span>%</span><div><h2>Resultado</h2><p>Seu plano de evolução aparece aqui.</p></div></div>
+              <div id="diagnosticoResultado" class="diagnostic-result empty-state"><p>Preencha o diagnóstico para receber sua nota.</p></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="view-trilha">
+          <div class="panel">
+            <div class="section-title"><span>7D</span><div><h2>Trilha Perfil Preparado EVOLUE</h2><p>Uma jornada guiada para deixar seu perfil pronto para oportunidades.</p></div></div>
+            <div class="trail-hero">
+              <div>
+                <span class="eyebrow">Progresso da trilha</span>
+                <strong id="trailProgressLabel">0%</strong>
+                <p id="trailNextAction">Comece completando seu perfil.</p>
+              </div>
+              <div class="trail-progress"><span id="trailProgressBar"></span></div>
+            </div>
+            <div id="trailSteps" class="trail-grid"></div>
+          </div>
+        </section>
+
+        <section class="view" id="view-apresentacao">
+          <div class="grid two">
+            <form class="panel" id="apresentacaoForm">
+              <div class="section-title"><span>🎙️</span><div><h2>Gerador “Fale sobre você”</h2><p>Monte uma apresentação curta, segura e natural para entrevistas.</p></div></div>
+              <label>Área ou cargo desejado<input id="apArea" placeholder="Auxiliar administrativo, atendimento..." /></label>
+              <label>Experiência principal<textarea id="apExperiencia" rows="3" placeholder="Conte sua experiência, projeto, curso ou atividade informal."></textarea></label>
+              <label>Qualidade mais forte<input id="apQualidade" placeholder="Organização, comunicação, responsabilidade..." /></label>
+              <label>Objetivo profissional<input id="apObjetivo" placeholder="Conseguir minha primeira oportunidade, recolocação..." /></label>
+              <label>Tipo de apresentação<select id="apTipo"><option value="curta">Curta - 30 segundos</option><option value="media">Média - 1 minuto</option><option value="primeiro">Primeiro emprego</option><option value="online">Entrevista online</option></select></label>
+              <div class="actions"><button type="button" id="btnGerarApresentacao" class="btn-primary">Gerar apresentação</button></div>
+            </form>
+            <section class="panel">
+              <div class="section-title compact"><span>Texto</span><div><h2>Sua fala pronta</h2><p>Copie, treine em voz alta e ajuste para soar natural.</p></div></div>
+              <div id="apresentacaoResultado" class="speech-card empty-state"><p>Preencha os campos para gerar sua apresentação.</p></div>
+              <div class="actions" id="apresentacaoAcoes" style="display:none">
+                <button type="button" id="btnCopiarApresentacao" class="ghost">Copiar texto</button>
+                <button type="button" id="btnSalvarApresentacao">Salvar apresentação</button>
+              </div>
             </section>
           </div>
         </section>

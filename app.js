@@ -5,6 +5,7 @@ const LOCAL_DATA_KEY = 'evolue_demo_data';
 const Estado = {
   perfil: null, curriculos: [], disc: null,
   entrevistas: [], tracker: [], viewAtual: 'perfil', questaoAtual: 0,
+  diagnostico: null, apresentacoes: [],
 };
 
 function temBanco() {
@@ -29,6 +30,8 @@ function salvarLocal(extra = {}) {
     disc: Estado.disc,
     entrevistas: Estado.entrevistas,
     tracker: Estado.tracker
+    ,diagnostico: Estado.diagnostico,
+    apresentacoes: Estado.apresentacoes
   };
   localStorage.setItem(LOCAL_DATA_KEY, JSON.stringify(dados));
 }
@@ -54,12 +57,13 @@ const TIPS = [
 ];
 
 const RECOMENDACOES = [
+  { titulo: 'Faça seu diagnóstico', texto: 'Descubra sua nota de empregabilidade e receba próximos passos.', view: 'diagnostico' },
+  { titulo: 'Complete a trilha EVOLUE', texto: 'Siga a jornada para liberar o Perfil Preparado EVOLUE.', view: 'trilha' },
+  { titulo: 'Crie seu “Fale sobre você”', texto: 'Tenha uma apresentação pronta para entrevista.', view: 'apresentacao' },
   { titulo: 'Complete seu perfil DISC', texto: 'O perfil comportamental aumenta suas chances no banco de talentos.', view: 'disc' },
   { titulo: 'Simule uma entrevista', texto: 'Candidatos que praticam têm 40% mais chances de aprovação.', view: 'entrevista' },
   { titulo: 'Analise o ATS Score', texto: 'Mais de 75% das empresas usam filtros automáticos.', view: 'ats' },
-  { titulo: 'Gere uma Cover Letter', texto: 'Uma carta personalizada aumenta muito suas chances.', view: 'cover' },
-  { titulo: 'Registre suas candidaturas', texto: 'Use o Job Tracker para não perder nenhum follow-up.', view: 'tracker' },
-  { titulo: 'Atualize seu currículo', texto: 'Mantenha sempre atualizado com suas últimas conquistas.', view: 'curriculo' },
+  { titulo: 'Registre suas candidaturas', texto: 'Use o Job Tracker para não perder nenhum follow-up.', view: 'tracker' }
 ];
 
 // ── Init ──────────────────────────────────────────────────────
@@ -97,6 +101,8 @@ function mostrarApp() {
   atualizarSidebar();
   renderizarTips();
   renderizarRecomendacoes();
+  renderizarDiagnostico();
+  renderizarTrilha();
   navegarPara('perfil');
 }
 
@@ -116,12 +122,17 @@ async function carregarDados() {
     Estado.disc = local.disc || null;
     Estado.entrevistas = local.entrevistas || [];
     Estado.tracker = local.tracker || [];
+    Estado.diagnostico = local.diagnostico || null;
+    Estado.apresentacoes = local.apresentacoes || [];
     preencherFormularioPerfil();
     preencherFormularioDisc();
+    preencherFormularioDiagnostico();
     atualizarSidebar();
     atualizarScore();
     atualizarDashboard();
     renderizarKanban();
+    renderizarDiagnostico();
+    renderizarTrilha();
     atualizarUsageCard();
     renderizarPrevia();
     return;
@@ -140,13 +151,19 @@ async function carregarDados() {
     if (d.data?.[0]) Estado.disc      = d.data[0];
     if (e.data)    Estado.entrevistas = e.data;
     if (t.data)    Estado.tracker     = t.data;
+    const local = carregarLocal();
+    Estado.diagnostico = local.diagnostico || null;
+    Estado.apresentacoes = local.apresentacoes || [];
 
     preencherFormularioPerfil();
     preencherFormularioDisc();
+    preencherFormularioDiagnostico();
     atualizarSidebar();
     atualizarScore();
     atualizarDashboard();
     renderizarKanban();
+    renderizarDiagnostico();
+    renderizarTrilha();
     atualizarUsageCard();
   } catch(err) { console.error('Erro ao carregar dados:', err); }
 }
@@ -161,6 +178,9 @@ function navegarPara(view) {
 
   const titulos = {
     perfil:        { h: 'Painel do candidato',       sub: 'Seus dados para currículo e banco de talentos.' },
+    diagnostico:   { h: 'Diagnóstico de empregabilidade', sub: 'Entenda seu nível atual e receba próximos passos claros.' },
+    trilha:        { h: 'Minha Trilha EVOLUE',        sub: 'Complete etapas para conquistar o Perfil Preparado EVOLUE.' },
+    apresentacao:  { h: 'Fale Sobre Você',            sub: 'Crie uma apresentação pronta para entrevistas.' },
     curriculo:     { h: 'Gerador de currículo',       sub: 'Crie e exporte seu currículo profissional.' },
     ats:           { h: 'ATS Score',                  sub: 'Veja se seu currículo passa pelo filtro automático.' },
     cover:         { h: 'Cover Letter',               sub: 'Carta de apresentação personalizada para cada vaga.' },
@@ -197,9 +217,11 @@ function atualizarScore() {
   let score = 0;
   if (p.nome) score+=5; if (p.email) score+=5; if (p.telefone) score+=5;
   if (p.cidade) score+=5; if (p.escolaridade) score+=5; if (p.area_interesse) score+=5;
+  if (Estado.diagnostico) score+=10;
+  if (Estado.apresentacoes.length>0) score+=10;
   if (Estado.curriculos.length>0) score+=25;
   if (Estado.disc) score+=20;
-  if (Estado.entrevistas.length>0) score+=25;
+  if (Estado.entrevistas.length>0) score+=15;
   score = Math.min(score, 100);
 
   setEl('scoreValue', score);
@@ -255,10 +277,163 @@ async function salvarPerfil() {
     Estado.perfil = perfil;
     atualizarSidebar(); atualizarScore(); atualizarDashboard();
     salvarLocal();
+    renderizarTrilha();
     if (dados.nome && dados.telefone && dados.cidade) await pontuar('cadastro_completo', 'Perfil completo', '👤');
     mostrarMensagem(msg, 'success', '✅ Perfil salvo!');
     mostrarToast('✅ Perfil salvo!');
   } catch(err) { mostrarMensagem(msg, 'error', '❌ ' + err.message); }
+}
+
+// ── Diagnóstico / Trilha / Apresentação ───────────────────────
+const DIAGNOSTICO_LABELS = {
+  curriculo: 'currículo atualizado',
+  apresentacao: 'apresentação pessoal',
+  entrevista: 'entrevista treinada',
+  area: 'área definida',
+  cursos: 'cursos ou aprendizados',
+  whatsapp: 'WhatsApp profissional',
+  disponibilidade: 'disponibilidade clara',
+  vagas: 'candidaturas recentes',
+  pontosFortes: 'pontos fortes com exemplos',
+  vagaAlvo: 'currículo adaptado por vaga'
+};
+
+function calcularDiagnostico() {
+  const form = document.getElementById('diagnosticoForm');
+  if (!form) return null;
+  const respostas = {};
+  Object.keys(DIAGNOSTICO_LABELS).forEach((key) => {
+    respostas[key] = !!form.querySelector(`[name="${key}"]`)?.checked;
+  });
+  const marcados = Object.values(respostas).filter(Boolean).length;
+  const score = Math.round((marcados / Object.keys(DIAGNOSTICO_LABELS).length) * 100);
+  const nivel = score >= 80 ? 'Ouro' : score >= 50 ? 'Prata' : 'Bronze';
+  const faltantes = Object.entries(respostas).filter(([, ok]) => !ok).map(([key]) => DIAGNOSTICO_LABELS[key]);
+  return { respostas, score, nivel, faltantes, data: new Date().toISOString() };
+}
+
+function preencherFormularioDiagnostico() {
+  const form = document.getElementById('diagnosticoForm');
+  if (!form || !Estado.diagnostico?.respostas) return;
+  Object.entries(Estado.diagnostico.respostas).forEach(([key, value]) => {
+    const input = form.querySelector(`[name="${key}"]`);
+    if (input) input.checked = !!value;
+  });
+}
+
+function renderizarDiagnostico() {
+  const box = document.getElementById('diagnosticoResultado');
+  if (!box) return;
+  const diag = Estado.diagnostico;
+  if (!diag) {
+    box.className = 'diagnostic-result empty-state';
+    box.innerHTML = '<p>Preencha o diagnóstico para receber sua nota.</p>';
+    return;
+  }
+  const proximos = diag.faltantes.slice(0, 3);
+  box.className = 'diagnostic-result';
+  box.innerHTML = `
+    <div class="diagnostic-score"><span>${diag.score}</span><small>/100</small></div>
+    <strong>Nível ${diag.nivel}</strong>
+    <p>${diag.score >= 80 ? 'Seu perfil está bem preparado para avançar nas oportunidades.' : 'Você já tem uma base. Foque nos próximos passos para evoluir rápido.'}</p>
+    <h3>Próximos passos recomendados</h3>
+    <ul>${(proximos.length ? proximos : ['manter currículo atualizado', 'registrar candidaturas', 'treinar entrevista']).map((item) => `<li>${item}</li>`).join('')}</ul>
+  `;
+}
+
+async function salvarDiagnostico() {
+  const diag = calcularDiagnostico();
+  if (!diag) return;
+  Estado.diagnostico = diag;
+  salvarLocal();
+  renderizarDiagnostico();
+  renderizarTrilha();
+  atualizarScore();
+  atualizarDashboard();
+  await pontuar('diagnostico_realizado', 'Diagnóstico realizado', '🧭');
+  mostrarToast('✅ Diagnóstico atualizado!');
+}
+
+function calcularTrilha() {
+  const p = Estado.perfil || {};
+  const steps = [
+    { id: 'perfil', title: 'Complete seu perfil', desc: 'Dados básicos para currículo e banco de talentos.', done: !!(p.nome && p.telefone && p.cidade && p.area_interesse), view: 'perfil' },
+    { id: 'diagnostico', title: 'Faça o diagnóstico', desc: 'Descubra seu nível de empregabilidade.', done: !!Estado.diagnostico, view: 'diagnostico' },
+    { id: 'curriculo', title: 'Gere seu currículo', desc: 'Escolha um modelo e emita o PDF.', done: Estado.curriculos.length > 0, view: 'curriculo' },
+    { id: 'apresentacao', title: 'Crie seu “Fale sobre você”', desc: 'Tenha uma fala pronta para entrevista.', done: Estado.apresentacoes.length > 0, view: 'apresentacao' },
+    { id: 'entrevista', title: 'Simule uma entrevista', desc: 'Responda e receba feedback imediato.', done: Estado.entrevistas.length > 0, view: 'entrevista' },
+    { id: 'ats', title: 'Analise uma vaga', desc: 'Compare currículo e descrição da vaga.', done: Estado.curriculos.some(c => c.ats_score) || !!carregarLocal().ats_realizado, view: 'ats' },
+    { id: 'selo', title: 'Receba seu selo EVOLUE', desc: 'Conclua a trilha para liberar o Perfil Preparado.', done: false, view: 'dashboard' }
+  ];
+  const baseDone = steps.slice(0, 6).filter(step => step.done).length;
+  steps[6].done = baseDone >= 5;
+  return { steps, done: steps.filter(step => step.done).length, total: steps.length };
+}
+
+function renderizarTrilha() {
+  const grid = document.getElementById('trailSteps');
+  if (!grid) return;
+  const trilha = calcularTrilha();
+  const percent = Math.round((trilha.done / trilha.total) * 100);
+  setEl('trailProgressLabel', `${percent}%`);
+  const bar = document.getElementById('trailProgressBar');
+  if (bar) bar.style.width = `${percent}%`;
+  const next = trilha.steps.find(step => !step.done);
+  setEl('trailNextAction', next ? `Próxima etapa: ${next.title}` : 'Trilha concluída. Perfil Preparado EVOLUE liberado.');
+  grid.innerHTML = trilha.steps.map((step, index) => `
+    <article class="trail-step ${step.done ? 'done' : ''}">
+      <span>${step.done ? '✓' : index + 1}</span>
+      <div>
+        <strong>${step.title}</strong>
+        <p>${step.desc}</p>
+      </div>
+      <button type="button" class="ghost" onclick="navegarPara('${step.view}')">${step.done ? 'Revisar' : 'Fazer'}</button>
+    </article>
+  `).join('');
+}
+
+function gerarTextoApresentacao() {
+  const p = Estado.perfil || {};
+  const area = document.getElementById('apArea')?.value?.trim() || p.area_interesse || 'área de interesse';
+  const experiencia = document.getElementById('apExperiencia')?.value?.trim() || p.experiencia || 'minhas experiências e aprendizados';
+  const qualidade = document.getElementById('apQualidade')?.value?.trim() || 'responsabilidade';
+  const objetivo = document.getElementById('apObjetivo')?.value?.trim() || 'crescer profissionalmente e contribuir com a equipe';
+  const tipo = document.getElementById('apTipo')?.value || 'curta';
+  const nome = p.nome || 'Meu nome é';
+  const inicio = nome === 'Meu nome é' ? 'Meu nome é [seu nome]' : `Meu nome é ${nome}`;
+  const base = `${inicio}. Tenho interesse em atuar na área de ${area}. Minha principal experiência envolve ${experiencia}. Eu me considero uma pessoa com ${qualidade}, e meu objetivo é ${objetivo}.`;
+  if (tipo === 'primeiro') return `${inicio}. Estou buscando minha primeira oportunidade na área de ${area}. Mesmo com pouca experiência formal, venho me preparando por meio de estudos, cursos e atividades práticas. Tenho como ponto forte ${qualidade} e quero uma oportunidade para aprender, contribuir e crescer profissionalmente.`;
+  if (tipo === 'online') return `${base} Em uma entrevista online, gosto de ser objetivo(a), escutar com atenção e explicar minhas experiências com clareza. Estou disponível para conversar melhor sobre como posso contribuir para a vaga.`;
+  if (tipo === 'media') return `${base} Nos últimos tempos, desenvolvi habilidades importantes como comunicação, organização e vontade de aprender. Acredito que posso contribuir com dedicação, postura profissional e interesse real em evoluir junto com a empresa.`;
+  return `${base} Acredito que posso contribuir com dedicação, aprendizado rápido e postura profissional.`;
+}
+
+function gerarApresentacao() {
+  const texto = gerarTextoApresentacao();
+  const box = document.getElementById('apresentacaoResultado');
+  if (box) {
+    box.className = 'speech-card';
+    box.innerHTML = `<p>${texto}</p><small>Dica: leia em voz alta 3 vezes e troque palavras que não soarem naturais.</small>`;
+  }
+  const acoes = document.getElementById('apresentacaoAcoes');
+  if (acoes) acoes.style.display = 'flex';
+}
+
+function copiarApresentacao() {
+  const texto = document.getElementById('apresentacaoResultado')?.innerText || '';
+  navigator.clipboard?.writeText(texto).then(() => mostrarToast('📋 Apresentação copiada!')).catch(() => mostrarToast('Copie manualmente o texto gerado.'));
+}
+
+async function salvarApresentacao() {
+  const texto = document.getElementById('apresentacaoResultado')?.innerText?.trim();
+  if (!texto || texto.includes('Preencha os campos')) { mostrarToast('⚠️ Gere uma apresentação primeiro.'); return; }
+  Estado.apresentacoes.unshift({ id: Date.now(), texto, created_at: new Date().toISOString() });
+  salvarLocal();
+  renderizarTrilha();
+  atualizarScore();
+  atualizarDashboard();
+  await pontuar('apresentacao_criada', 'Apresentação criada', '🎙️');
+  mostrarToast('✅ Apresentação salva!');
 }
 
 // ── Currículo ─────────────────────────────────────────────────
@@ -324,6 +499,8 @@ async function emitirPDF() {
   if (Estado.perfil) Estado.perfil.curriculos_emitidos = count+1;
   salvarLocal();
   atualizarUsageCard();
+  renderizarTrilha();
+  atualizarDashboard();
   await pontuar('curriculo_gerado', 'Currículo gerado', '📄');
   window.print();
 }
@@ -426,6 +603,9 @@ async function analisarATS() {
       <div style="font-size:12px;font-weight:800;color:#09234c;margin-bottom:8px">❌ Ausentes — adicione ao currículo</div>
       <div style="display:flex;flex-wrap:wrap;gap:5px">${aus.slice(0,15).map(i=>`<span style="font-size:11px;padding:3px 9px;border-radius:99px;background:#fff1f2;color:#be123c;border:1px solid #fecdd3;font-weight:600">✗ ${i.termo}</span>`).join('')}</div>
     </div>`;
+  salvarLocal({ ats_realizado: true });
+  renderizarTrilha();
+  atualizarDashboard();
   await pontuar('ats_score_feito', 'ATS Score realizado', '⚡');
   mostrarToast('✅ Análise concluída!');
 }
@@ -664,8 +844,9 @@ function atualizarDashboard() {
   let score=0;
   if(p.nome) score+=5; if(p.email) score+=5; if(p.telefone) score+=5;
   if(p.cidade) score+=5; if(p.escolaridade) score+=5; if(p.area_interesse) score+=5;
+  if(Estado.diagnostico) score+=10; if(Estado.apresentacoes.length>0) score+=10;
   if(Estado.curriculos.length>0) score+=25; if(Estado.disc) score+=20;
-  if(Estado.entrevistas.length>0) score+=25;
+  if(Estado.entrevistas.length>0) score+=15;
   score=Math.min(score,100);
   const selo=score>=80?'Ouro':score>=40?'Prata':'Bronze';
   setEl('metricScore',score); setEl('metricLevel',selo);
@@ -673,6 +854,9 @@ function atualizarDashboard() {
   setEl('metricDisc',Estado.disc?.perfil_predominante||'-'); setEl('metricVagas',Estado.tracker.length);
   const checks=[
     {label:'Perfil completo', done:!!(p.nome&&p.telefone&&p.cidade&&p.escolaridade)},
+    {label:'Diagnóstico realizado', done:!!Estado.diagnostico},
+    {label:'Trilha iniciada', done:calcularTrilha().done>0},
+    {label:'Apresentação criada', done:Estado.apresentacoes.length>0},
     {label:'Currículo gerado', done:Estado.curriculos.length>0},
     {label:'DISC preenchido', done:!!Estado.disc},
     {label:'Entrevista simulada', done:Estado.entrevistas.length>0},
@@ -691,7 +875,7 @@ function renderizarRecomendacoes() {
 // ── Gamificação ───────────────────────────────────────────────
 async function pontuar(tipo, motivo, icone) {
   const userId=Auth.getUsuario()?.id || 'demo-user';
-  const pts = {cadastro_completo:10,curriculo_gerado:8,entrevista_simulada:5,disc_preenchido:8,vaga_registrada:3,ats_score_feito:4,cover_letter_gerada:4}[tipo]||1;
+  const pts = {cadastro_completo:10,diagnostico_realizado:6,apresentacao_criada:6,curriculo_gerado:8,entrevista_simulada:5,disc_preenchido:8,vaga_registrada:3,ats_score_feito:4,cover_letter_gerada:4}[tipo]||1;
   if (!temBanco()) {
     if (Estado.perfil) {
       Estado.perfil.career_points = (Estado.perfil.career_points || 0) + pts;
@@ -761,6 +945,8 @@ function limparDados() {
   Estado.disc = null;
   Estado.entrevistas = [];
   Estado.tracker = [];
+  Estado.diagnostico = null;
+  Estado.apresentacoes = [];
   if (Estado.perfil) {
     Estado.perfil.curriculos_emitidos = 0;
     Estado.perfil.career_points = 0;
@@ -769,6 +955,8 @@ function limparDados() {
   atualizarScore();
   atualizarDashboard();
   renderizarKanban();
+  renderizarDiagnostico();
+  renderizarTrilha();
   atualizarUsageCard();
   mostrarToast('🗑️ Dados locais limpos.');
 }
@@ -838,6 +1026,16 @@ function configurarEventos() {
 
   // Perfil
   document.getElementById('btnSalvarPerfil')?.addEventListener('click', salvarPerfil);
+
+  // Diagnóstico / Trilha / Apresentação
+  document.getElementById('btnSalvarDiagnostico')?.addEventListener('click', salvarDiagnostico);
+  document.getElementById('diagnosticoForm')?.addEventListener('change', () => {
+    Estado.diagnostico = calcularDiagnostico();
+    renderizarDiagnostico();
+  });
+  document.getElementById('btnGerarApresentacao')?.addEventListener('click', gerarApresentacao);
+  document.getElementById('btnCopiarApresentacao')?.addEventListener('click', copiarApresentacao);
+  document.getElementById('btnSalvarApresentacao')?.addEventListener('click', salvarApresentacao);
 
   // Currículo
   document.getElementById('improveResume')?.addEventListener('click', sugerirMelhorias);

@@ -736,6 +736,193 @@ input:focus, textarea:focus, select:focus {
 .usage-card p { margin: 4px 0 0; color: var(--muted); }
 .usage-card.is-paid { border-color: rgba(234,179,8,.4); background: var(--warm); }
 
+/* ── Diagnóstico / Trilha / Fale sobre você ─────────────────── */
+.diagnostic-list {
+  display: grid;
+  gap: 10px;
+}
+
+.check-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: white;
+  color: var(--navy);
+  cursor: pointer;
+  transition: all var(--trans);
+}
+
+.check-card:hover {
+  border-color: rgba(21,87,166,.3);
+  box-shadow: var(--shadow-sm);
+}
+
+.check-card input {
+  width: 18px;
+  min-height: 18px;
+  accent-color: var(--blue);
+}
+
+.diagnostic-result {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid rgba(57,183,196,.35);
+  border-radius: var(--radius-sm);
+  background: #f3fbfd;
+}
+
+.diagnostic-result.empty-state {
+  border-color: var(--line);
+  background: var(--soft);
+}
+
+.diagnostic-score {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--blue);
+}
+
+.diagnostic-score span {
+  font-size: 58px;
+  line-height: 1;
+  font-weight: 900;
+}
+
+.diagnostic-score small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.diagnostic-result h3 {
+  margin: 4px 0 0;
+  color: var(--navy);
+  font-size: 14px;
+}
+
+.diagnostic-result ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.trail-hero {
+  display: grid;
+  grid-template-columns: minmax(220px, .36fr) 1fr;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 18px;
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(120deg, rgba(9,35,76,.95), rgba(21,87,166,.88)),
+    url('Ativos/evolue-networking.jpeg') center / cover;
+  color: white;
+}
+
+.trail-hero strong {
+  display: block;
+  margin: 4px 0;
+  font-size: 42px;
+  line-height: 1;
+}
+
+.trail-hero p {
+  margin: 0;
+  color: rgba(255,255,255,.76);
+  font-size: 13px;
+}
+
+.trail-progress {
+  height: 14px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(255,255,255,.18);
+}
+
+.trail-progress span {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--cyan), var(--green));
+  transition: width .5s ease;
+}
+
+.trail-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.trail-step {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: white;
+}
+
+.trail-step > span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--soft);
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.trail-step.done {
+  border-color: rgba(82,183,136,.45);
+  background: #f7fbf9;
+}
+
+.trail-step.done > span {
+  color: white;
+  background: var(--green);
+}
+
+.trail-step strong {
+  color: var(--navy);
+}
+
+.trail-step p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.speech-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid rgba(21,87,166,.24);
+  border-left: 5px solid var(--blue);
+  border-radius: var(--radius-sm);
+  background: white;
+}
+
+.speech-card p {
+  margin: 0;
+  color: #344054;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.speech-card small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 /* ── Talent card ─────────────────────────────────────────── */
 .talent-card { overflow: hidden; padding-top: 0; }
 
@@ -1204,6 +1391,7 @@ dd { margin: 3px 0 0; font-weight: 800; color: var(--navy); font-size: 13px; }
 @media (max-width: 1100px) {
   .grid.two { grid-template-columns: 1fr; }
   .kanban { grid-template-columns: repeat(3, minmax(200px, 1fr)); }
+  .trail-hero { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 900px) {
@@ -1218,7 +1406,7 @@ dd { margin: 3px 0 0; font-weight: 800; color: var(--navy); font-size: 13px; }
 @media (max-width: 640px) {
   .main, .sidebar { padding: 14px; }
   .form-grid, .template-picker, .tips-grid,
-  .recommendation-grid, .quick-stats { grid-template-columns: 1fr; }
+  .recommendation-grid, .quick-stats, .trail-step { grid-template-columns: 1fr; }
   .topbar h1 { font-size: 28px; }
   .kanban { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
   .dashboard-grid { grid-template-columns: repeat(3, 1fr); }
